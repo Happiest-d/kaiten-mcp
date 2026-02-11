@@ -4,9 +4,11 @@ import {
   type KaitenCard,
   type KaitenComment,
   type KaitenTimeLog,
+  type KaitenCreateCardRequest,
   type TaskDetails,
   type CommentsPage,
   type TimeLogEntry,
+  type CreatedTask,
 } from './types.js';
 
 export { KaitenApiError } from './types.js';
@@ -82,21 +84,39 @@ export class KaitenClient {
     }));
   }
 
-  private async request<T>(endpoint: string): Promise<T> {
+  async createCard(params: KaitenCreateCardRequest): Promise<CreatedTask> {
+    const raw = await this.request<KaitenCard>('/cards', 'POST', params);
+    return {
+      card_id: raw.id,
+      title: raw.title,
+      board_id: raw.board_id,
+      column_id: raw.column_id,
+      lane_id: raw.lane_id,
+      state: mapState(raw.state),
+      created_at: raw.created,
+    };
+  }
+
+  private async request<T>(endpoint: string, method: string = 'GET', body?: unknown): Promise<T> {
     const url = `${this.config.baseUrl}${endpoint}`;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 30_000);
 
     try {
-      const response = await fetch(url, {
-        method: 'GET',
+      const options: RequestInit = {
+        method,
         headers: {
           'Authorization': `Bearer ${this.config.token}`,
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
         signal: controller.signal,
-      });
+      };
+      if (body !== undefined) {
+        options.body = JSON.stringify(body);
+      }
+
+      const response = await fetch(url, options);
 
       if (!response.ok) {
         throw new KaitenApiError(

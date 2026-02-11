@@ -6,8 +6,8 @@
 |---|------|--------|-------|-------|------------|
 | 1 | get-task-details | готово (reviewed) | specs/01-get-task-details.md | tests/tools/get-task-details.test.ts | src/tools/get-task-details.ts |
 | 2 | get-time-logs | готово (GREEN) | specs/02-get-time-logs.md | tests/tools/get-time-logs.test.ts | src/tools/get-time-logs.ts |
-| 3 | get-task-status | не начата | specs/03-get-task-status.md | — | — |
-| 4 | create-task | не начата | specs/04-create-task.md | — | — |
+| 3 | get-task-status | готово (GREEN + reviewed) | specs/03-get-task-status.md | tests/tools/get-task-status.test.ts | src/tools/get-task-status.ts |
+| 4 | create-task | готово (GREEN + reviewed) | specs/04-create-task.md | tests/tools/create-task.test.ts | src/tools/create-task.ts |
 
 ## Инфраструктура
 
@@ -23,10 +23,10 @@
 
 ## Тесты
 
-- Всего: 40 (фича 1: 33, фича 2: 7)
-- Проходят: 40
+- Всего: 58 (фича 1: 33, фича 2: 7, фича 3: 6, фича 4: 7+5 клиент)
+- Проходят: 58
 - Падают: 0
-- Фаза: фича 1 GREEN+REVIEWED, фича 2 GREEN
+- Фаза: все 4 фичи GREEN + REVIEWED
 
 ## Документация
 

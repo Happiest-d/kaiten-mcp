@@ -2,6 +2,8 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { KaitenClient, type KaitenClientConfig } from './kaiten/client.js';
 import { registerGetTaskDetails } from './tools/get-task-details.js';
 import { registerGetTimeLogs } from './tools/get-time-logs.js';
+import { registerGetTaskStatus } from './tools/get-task-status.js';
+import { registerCreateTask } from './tools/create-task.js';
 
 export function createServer(clientConfig: KaitenClientConfig): McpServer {
   const server = new McpServer({
@@ -13,6 +15,8 @@ export function createServer(clientConfig: KaitenClientConfig): McpServer {
 
   registerGetTaskDetails(server, client);
   registerGetTimeLogs(server, client);
+  registerGetTaskStatus(server, client);
+  registerCreateTask(server, client);
 
   return server;
 }

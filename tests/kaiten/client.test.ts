@@ -444,4 +444,127 @@ describe('KaitenClient', () => {
       );
     });
   });
+
+  describe('createCard', () => {
+    function createMockKaitenCardResponse(): KaitenCard {
+      return {
+        id: 12350,
+        title: 'Добавить валидацию email',
+        description: null,
+        state: 1,
+        board_id: 10,
+        column_id: 100,
+        lane_id: null,
+        owner_id: null,
+        members: [],
+        tags: [],
+        created: '2026-02-11T10:00:00Z',
+        updated: '2026-02-11T10:00:00Z',
+      };
+    }
+
+    it('should make POST request with auth header and body, map response', async () => {
+      const mockCard = createMockKaitenCardResponse();
+
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response(JSON.stringify(mockCard), { status: 200 }),
+      );
+
+      const result = await client.createCard({
+        title: 'Добавить валидацию email',
+        board_id: 10,
+        column_id: 100,
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        `${baseUrl}/cards`,
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            'Authorization': `Bearer ${token}`,
+          }),
+          body: JSON.stringify({
+            title: 'Добавить валидацию email',
+            board_id: 10,
+            column_id: 100,
+          }),
+        }),
+      );
+
+      expect(result.card_id).toBe(12350);
+      expect(result.title).toBe('Добавить валидацию email');
+      expect(result.board_id).toBe(10);
+      expect(result.column_id).toBe(100);
+      expect(result.lane_id).toBeNull();
+      expect(result.state).toBe('active');
+      expect(result.created_at).toBe('2026-02-11T10:00:00Z');
+    });
+
+    it('should return empty lane_id when null', async () => {
+      const mockCard = createMockKaitenCardResponse();
+
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response(JSON.stringify(mockCard), { status: 200 }),
+      );
+
+      const result = await client.createCard({
+        title: 'Добавить валидацию email',
+        board_id: 10,
+        column_id: 100,
+      });
+
+      expect(result.lane_id).toBeNull();
+    });
+
+    it('should throw KaitenApiError on 401', async () => {
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response('Unauthorized', { status: 401 }),
+      );
+
+      await expect(
+        client.createCard({ title: 'Test', board_id: 10, column_id: 100 }),
+      ).rejects.toThrow(KaitenApiError);
+
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response('Unauthorized', { status: 401 }),
+      );
+      await expect(
+        client.createCard({ title: 'Test', board_id: 10, column_id: 100 }),
+      ).rejects.toThrow('Ошибка авторизации. Проверьте KAITEN_API_TOKEN');
+    });
+
+    it('should throw KaitenApiError on 403', async () => {
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response('Forbidden', { status: 403 }),
+      );
+
+      await expect(
+        client.createCard({ title: 'Test', board_id: 10, column_id: 100 }),
+      ).rejects.toThrow(KaitenApiError);
+
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response('Forbidden', { status: 403 }),
+      );
+      await expect(
+        client.createCard({ title: 'Test', board_id: 10, column_id: 100 }),
+      ).rejects.toThrow('Нет доступа к карточке');
+    });
+
+    it('should throw KaitenApiError on 404', async () => {
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response('Not found', { status: 404 }),
+      );
+
+      await expect(
+        client.createCard({ title: 'Test', board_id: 10, column_id: 100 }),
+      ).rejects.toThrow(KaitenApiError);
+
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response('Not found', { status: 404 }),
+      );
+      await expect(
+        client.createCard({ title: 'Test', board_id: 10, column_id: 100 }),
+      ).rejects.toThrow('Карточка не найдена');
+    });
+  });
 });

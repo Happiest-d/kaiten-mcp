@@ -70,6 +70,17 @@ export interface CommentItem {
   updated_at: string;
 }
 
+/** POST /api/latest/cards -- request body */
+export interface KaitenCreateCardRequest {
+  title: string;
+  board_id: number;
+  column_id: number;
+  lane_id?: number;
+  description?: string;
+  position?: 1 | 2;
+  tags?: number[];
+}
+
 /** GET /api/latest/cards/{card_id}/time-logs -- array element */
 export interface KaitenTimeLog {
   id: number;
@@ -110,6 +121,30 @@ export interface TimeLogsByDate {
   card_id: number;
   total_minutes: number;
   by_date: { for_date: string; total_minutes: number; entries: TimeLogEntry[] }[];
+}
+
+export interface TaskStatus {
+  card_id: number;
+  title: string;
+  board_id: number;
+  column_id: number;
+  state: string;
+  updated_at: string;
+}
+
+export interface TaskStatusError {
+  card_id: number;
+  error: string;
+}
+
+export interface CreatedTask {
+  card_id: number;
+  title: string;
+  board_id: number;
+  column_id: number;
+  lane_id: number | null;
+  state: string;
+  created_at: string;
 }
 
 // --- State mapping ---
