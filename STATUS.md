@@ -5,7 +5,7 @@
 | # | Фича | Статус | Спека | Тесты | Реализация |
 |---|------|--------|-------|-------|------------|
 | 1 | get-task-details | готово (reviewed) | specs/01-get-task-details.md | tests/tools/get-task-details.test.ts | src/tools/get-task-details.ts |
-| 2 | get-time-logs | тесты (red phase) | specs/02-get-time-logs.md | tests/tools/get-time-logs.test.ts | src/tools/get-time-logs.ts (заглушка) |
+| 2 | get-time-logs | готово (GREEN) | specs/02-get-time-logs.md | tests/tools/get-time-logs.test.ts | src/tools/get-time-logs.ts |
 | 3 | get-task-status | не начата | specs/03-get-task-status.md | — | — |
 | 4 | create-task | не начата | specs/04-create-task.md | — | — |
 
@@ -23,10 +23,10 @@
 
 ## Тесты
 
-- Всего: 29 (фича 1)
-- Проходят: 29
+- Всего: 40 (фича 1: 33, фича 2: 7)
+- Проходят: 40
 - Падают: 0
-- Фаза: фича 1 GREEN+REVIEWED, фича 2 RED (в работе)
+- Фаза: фича 1 GREEN+REVIEWED, фича 2 GREEN
 
 ## Документация
 

@@ -3,6 +3,7 @@ import {
   mapState,
   type KaitenCard,
   type KaitenComment,
+  type KaitenTimeLog,
   type TaskDetails,
   type CommentsPage,
   type TimeLogEntry,
@@ -68,8 +69,17 @@ export class KaitenClient {
     };
   }
 
-  async getCardTimeLogs(_cardId: number): Promise<TimeLogEntry[]> {
-    throw new Error('Not implemented');
+  async getCardTimeLogs(cardId: number): Promise<TimeLogEntry[]> {
+    const raw = await this.request<KaitenTimeLog[]>(`/cards/${cardId}/time-logs`);
+    return raw.map(entry => ({
+      id: entry.id,
+      user_id: entry.user_id,
+      author_id: entry.author_id,
+      time_spent: entry.time_spent,
+      for_date: entry.for_date,
+      comment: entry.comment,
+      created_at: entry.created,
+    }));
   }
 
   private async request<T>(endpoint: string): Promise<T> {

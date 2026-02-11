@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "MCP-сервер для работы с задачами Kaiten через AI-агентов",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
