@@ -174,10 +174,38 @@ export interface UpdatedTask {
 
 // --- State mapping ---
 
+/**
+ * State — глобальное свойство карточки, определяющее её жизненный цикл.
+ *
+ * Источник: Kaiten API (поле `state` в GET/POST/PATCH /cards)
+ *
+ * ВАЖНО: State НЕ связано с типом колонки (column.type).
+ * - card.state — состояние карточки (активна/архивирована/завершена)
+ * - column.type — тип колонки на доске ("normal", "active", "done")
+ *
+ * Карточка может быть архивирована (state=2) в любой колонке,
+ * или быть активной (state=1) в колонке типа "done".
+ *
+ * Используется:
+ * - Для фильтрации карточек через параметр `condition` в GET /cards
+ * - Для архивации карточек через PATCH /cards/{id} с state=2
+ */
+const CARD_STATE = {
+  ACTIVE: 1,      // Карточка активна (on board)
+  ARCHIVED: 2,    // Карточка архивирована
+  COMPLETED: 3,   // Карточка завершена (выведено эмпирически)
+} as const;
+
 const STATE_MAP: Record<number, string> = {
-  1: 'active',
+  [CARD_STATE.ACTIVE]: 'active',
+  [CARD_STATE.ARCHIVED]: 'archived',
+  [CARD_STATE.COMPLETED]: 'completed',
 };
 
+/**
+ * Маппит числовой state из Kaiten API в читаемую строку.
+ * Для неизвестных значений возвращает "unknown_{state}" (поддержка будущих расширений API).
+ */
 export function mapState(state: number): string {
   return STATE_MAP[state] ?? `unknown_${state}`;
 }
