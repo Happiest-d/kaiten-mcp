@@ -8,7 +8,7 @@ export function registerGetTaskStatus(server: McpServer, client: KaitenClient): 
     'get-task-status',
     {
       title: 'Get Task Status',
-      description: 'Получить текущий статус задачи (карточки) в Kaiten по ID. Поддерживает запрос статусов нескольких задач за один вызов.',
+      description: 'Получить текущий статус задачи (карточки) в Kaiten по ID. Поддерживает запрос статусов нескольких задач за один вызов (до 50).\n\nФОРМАТ ОТВЕТА:\nМассив объектов, каждый содержит:\n- card_id, title, board_id, column_id\n- state: строка состояния (см. маппинг ниже)\n- updated_at: ISO timestamp последнего обновления\n- error: строка ошибки (если карточка не найдена или недоступна)\n\nМАППИНГ СОСТОЯНИЙ (state):\n- "active" — карточка активна (state=1 в API)\n- "unknown_N" — неизвестное состояние (где N — код из API)\n\nПРИМЕРЫ:\n- Одна задача: card_ids=[12345]\n- Несколько задач: card_ids=[12345, 67890, 11111]\n- Массовая проверка: card_ids=[1,2,3,...,50] (до 50 за раз)\n\nОШИБКИ:\n- Если карточка не найдена → объект с полем error вместо title/state\n- Ошибка авторизации (401) → прерывает запрос для всех карточек',
       inputSchema: z.object({
         card_ids: z.array(z.number().int().positive())
           .min(1)

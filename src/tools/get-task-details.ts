@@ -8,7 +8,7 @@ export function registerGetTaskDetails(server: McpServer, client: KaitenClient):
     {
       title: 'Get Task Details',
       description:
-        'Получить детальную информацию о задаче (карточке) в Kaiten: описание, метаданные, исполнителей и комментарии. Комментарии поддерживают пагинацию.',
+        'Получить детальную информацию о задаче (карточке) в Kaiten: описание, метаданные, исполнителей и комментарии.\n\nСТРУКТУРА ОТВЕТА:\n- id, title, description, state (статус)\n- owner (автор), responsible (исполнитель), members (участники)\n- board_id, column_id, lane_id\n- tags, links (связи с другими картами)\n- created_at, updated_at (ISO timestamps)\n- comments (если include_comments=true): массив с полями text, author_id, created_at, updated_at\n\nПАГИНАЦИЯ КОММЕНТАРИЕВ:\n- comments_limit: количество комментариев на запрос (по умолчанию 20, максимум 100)\n- comments_offset: начать с N-го комментария (для получения следующих страниц)\n- has_more (в ответе): true если есть ещё комментарии\n- Пример: offset=0, limit=20 → первые 20; offset=20, limit=20 → следующие 20\n\nПРИМЕРЫ:\n- Базовый: card_id=12345 (include_comments по умолчанию true)\n- Без комментариев: card_id=12345, include_comments=false\n- Вторая страница комментариев: card_id=12345, comments_offset=20, comments_limit=20',
       inputSchema: z.object({
         card_id: z.number().int().positive()
           .describe('ID карточки'),

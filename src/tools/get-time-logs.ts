@@ -8,7 +8,7 @@ export function registerGetTimeLogs(server: McpServer, client: KaitenClient): vo
     {
       title: 'Get Time Logs',
       description:
-        'Получить логи учёта времени по задаче (карточке) в Kaiten. Возвращает записи о потраченном времени с разбивкой по пользователям и дням, а также суммарное время.',
+        'Получить логи учёта времени по задаче (карточке) в Kaiten. Возвращает записи о потраченном времени с разбивкой по пользователям и дням, а также суммарное время.\n\nФОРМАТ ВРЕМЕНИ:\n- Все значения time_spent и total_minutes в минутах (целые числа)\n- Пример: 120 минут = 2 часа, 480 минут = 8 часов (рабочий день)\n\nРЕЖИМЫ ГРУППИРОВКИ (group_by):\n\n1. "none" (по умолчанию) — плоский список всех записей:\n   { card_id, total_minutes, entries: [{ id, user_id, author_id, time_spent, for_date, comment, created_at }, ...] }\n\n2. "user" — группировка по пользователям:\n   { card_id, total_minutes, by_user: [{ user_id, total_minutes, entries: [...] }, ...] }\n   Полезно для ответа "сколько времени потратил каждый участник"\n\n3. "date" — группировка по дням:\n   { card_id, total_minutes, by_date: [{ for_date, total_minutes, entries: [...] }, ...] }\n   Полезно для временных отчётов и анализа динамики\n\nПРИМЕРЫ:\n- Все логи: card_id=12345 (или group_by="none")\n- По пользователям: card_id=12345, group_by="user"\n- По дням: card_id=12345, group_by="date"',
       inputSchema: z.object({
         card_id: z.number().int().positive()
           .describe('ID карточки'),
