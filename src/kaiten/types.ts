@@ -81,6 +81,17 @@ export interface KaitenCreateCardRequest {
   tags?: number[];
 }
 
+/** PATCH /api/latest/cards/{card_id} -- request body */
+export interface KaitenUpdateCardRequest {
+  title?: string;
+  description?: string;
+  column_id?: number;
+  lane_id?: number;
+  owner_id?: number;
+  members?: number[];
+  tags?: number[];
+}
+
 /** GET /api/latest/cards/{card_id}/time-logs -- array element */
 export interface KaitenTimeLog {
   id: number;
@@ -145,6 +156,20 @@ export interface CreatedTask {
   lane_id: number | null;
   state: string;
   created_at: string;
+}
+
+export interface UpdatedTask {
+  card_id: number;
+  title: string;
+  description: string | null;
+  board_id: number;
+  column_id: number;
+  lane_id: number | null;
+  state: string;
+  owner_id: number | null;
+  members: { id: number; full_name: string }[];
+  tags: { id: number; name: string }[];
+  updated_at: string;
 }
 
 // --- State mapping ---

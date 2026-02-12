@@ -5,10 +5,12 @@ import {
   type KaitenComment,
   type KaitenTimeLog,
   type KaitenCreateCardRequest,
+  type KaitenUpdateCardRequest,
   type TaskDetails,
   type CommentsPage,
   type TimeLogEntry,
   type CreatedTask,
+  type UpdatedTask,
 } from './types.js';
 
 export { KaitenApiError } from './types.js';
@@ -94,6 +96,23 @@ export class KaitenClient {
       lane_id: raw.lane_id,
       state: mapState(raw.state),
       created_at: raw.created,
+    };
+  }
+
+  async updateCard(cardId: number, params: KaitenUpdateCardRequest): Promise<UpdatedTask> {
+    const raw = await this.request<KaitenCard>(`/cards/${cardId}`, 'PATCH', params);
+    return {
+      card_id: raw.id,
+      title: raw.title,
+      description: raw.description,
+      board_id: raw.board_id,
+      column_id: raw.column_id,
+      lane_id: raw.lane_id,
+      state: mapState(raw.state),
+      owner_id: raw.owner_id,
+      members: raw.members.map(m => ({ id: m.id, full_name: m.full_name })),
+      tags: raw.tags.map(t => ({ id: t.id, name: t.name })),
+      updated_at: raw.updated,
     };
   }
 

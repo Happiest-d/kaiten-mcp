@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { KaitenClient, KaitenApiError } from '../../src/kaiten/client.js';
-import type { KaitenCard, KaitenComment, KaitenTimeLog } from '../../src/kaiten/types.js';
+import type { KaitenCard, KaitenComment, KaitenTimeLog, KaitenUpdateCardRequest } from '../../src/kaiten/types.js';
 
 function createMockKaitenCard(overrides: Partial<KaitenCard> = {}): KaitenCard {
   return {
@@ -565,6 +565,229 @@ describe('KaitenClient', () => {
       await expect(
         client.createCard({ title: 'Test', board_id: 10, column_id: 100 }),
       ).rejects.toThrow('Карточка не найдена');
+    });
+  });
+
+  describe('updateCard', () => {
+    function createMockUpdatedCard(overrides: Partial<KaitenCard> = {}): KaitenCard {
+      return {
+        id: 12345,
+        title: 'Updated title',
+        description: 'Updated description',
+        state: 1,
+        board_id: 10,
+        column_id: 102,
+        lane_id: 50,
+        owner_id: 501,
+        members: [
+          { id: 501, full_name: 'Иван Иванов' },
+        ],
+        tags: [
+          { id: 1, name: 'updated' },
+        ],
+        created: '2026-02-01T10:00:00Z',
+        updated: '2026-02-12T20:00:00Z',
+        ...overrides,
+      };
+    }
+
+    it('should make PATCH request with auth header and body, map response', async () => {
+      const mockCard = createMockUpdatedCard();
+      const updateParams: KaitenUpdateCardRequest = {
+        title: 'Updated title',
+        description: 'Updated description',
+      };
+
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response(JSON.stringify(mockCard), { status: 200 }),
+      );
+
+      const result = await client.updateCard(12345, updateParams);
+
+      expect(fetch).toHaveBeenCalledWith(
+        `${baseUrl}/cards/12345`,
+        expect.objectContaining({
+          method: 'PATCH',
+          headers: expect.objectContaining({
+            'Authorization': `Bearer ${token}`,
+          }),
+          body: JSON.stringify(updateParams),
+        }),
+      );
+
+      expect(result.card_id).toBe(12345);
+      expect(result.title).toBe('Updated title');
+      expect(result.description).toBe('Updated description');
+      expect(result.state).toBe('active');
+      expect(result.board_id).toBe(10);
+      expect(result.column_id).toBe(102);
+      expect(result.lane_id).toBe(50);
+      expect(result.owner_id).toBe(501);
+      expect(result.members).toHaveLength(1);
+      expect(result.tags).toHaveLength(1);
+      expect(result.updated_at).toBe('2026-02-12T20:00:00Z');
+    });
+
+    it('should update only title field', async () => {
+      const mockCard = createMockUpdatedCard({ title: 'New title only' });
+
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response(JSON.stringify(mockCard), { status: 200 }),
+      );
+
+      const result = await client.updateCard(12345, { title: 'New title only' });
+
+      expect(fetch).toHaveBeenCalledWith(
+        `${baseUrl}/cards/12345`,
+        expect.objectContaining({
+          body: JSON.stringify({ title: 'New title only' }),
+        }),
+      );
+
+      expect(result.title).toBe('New title only');
+    });
+
+    it('should update only description field', async () => {
+      const mockCard = createMockUpdatedCard({ description: 'New description only' });
+
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response(JSON.stringify(mockCard), { status: 200 }),
+      );
+
+      const result = await client.updateCard(12345, { description: 'New description only' });
+
+      expect(fetch).toHaveBeenCalledWith(
+        `${baseUrl}/cards/12345`,
+        expect.objectContaining({
+          body: JSON.stringify({ description: 'New description only' }),
+        }),
+      );
+
+      expect(result.description).toBe('New description only');
+    });
+
+    it('should update multiple fields at once', async () => {
+      const mockCard = createMockUpdatedCard({
+        title: 'Multi-field update',
+        column_id: 105,
+        owner_id: 502,
+      });
+
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response(JSON.stringify(mockCard), { status: 200 }),
+      );
+
+      const result = await client.updateCard(12345, {
+        title: 'Multi-field update',
+        column_id: 105,
+        owner_id: 502,
+      });
+
+      expect(result.title).toBe('Multi-field update');
+      expect(result.column_id).toBe(105);
+      expect(result.owner_id).toBe(502);
+    });
+
+    it('should update members array', async () => {
+      const mockCard = createMockUpdatedCard({
+        members: [
+          { id: 501, full_name: 'Иван Иванов' },
+          { id: 502, full_name: 'Мария Петрова' },
+        ],
+      });
+
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response(JSON.stringify(mockCard), { status: 200 }),
+      );
+
+      const result = await client.updateCard(12345, { members: [501, 502] });
+
+      expect(result.members).toHaveLength(2);
+      expect(result.members[0].id).toBe(501);
+      expect(result.members[1].id).toBe(502);
+    });
+
+    it('should update tags array', async () => {
+      const mockCard = createMockUpdatedCard({
+        tags: [
+          { id: 1, name: 'bug' },
+          { id: 2, name: 'urgent' },
+        ],
+      });
+
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response(JSON.stringify(mockCard), { status: 200 }),
+      );
+
+      const result = await client.updateCard(12345, { tags: [1, 2] });
+
+      expect(result.tags).toHaveLength(2);
+      expect(result.tags[0].id).toBe(1);
+      expect(result.tags[1].id).toBe(2);
+    });
+
+    it('should throw KaitenApiError on 404', async () => {
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response('Not found', { status: 404 }),
+      );
+
+      await expect(
+        client.updateCard(99999, { title: 'Test' }),
+      ).rejects.toThrow(KaitenApiError);
+
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response('Not found', { status: 404 }),
+      );
+      await expect(
+        client.updateCard(99999, { title: 'Test' }),
+      ).rejects.toThrow('Карточка не найдена');
+    });
+
+    it('should throw KaitenApiError on 403', async () => {
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response('Forbidden', { status: 403 }),
+      );
+
+      await expect(
+        client.updateCard(12345, { title: 'Test' }),
+      ).rejects.toThrow(KaitenApiError);
+
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response('Forbidden', { status: 403 }),
+      );
+      await expect(
+        client.updateCard(12345, { title: 'Test' }),
+      ).rejects.toThrow('Нет доступа к карточке');
+    });
+
+    it('should throw KaitenApiError on 401', async () => {
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response('Unauthorized', { status: 401 }),
+      );
+
+      await expect(
+        client.updateCard(12345, { title: 'Test' }),
+      ).rejects.toThrow(KaitenApiError);
+
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response('Unauthorized', { status: 401 }),
+      );
+      await expect(
+        client.updateCard(12345, { title: 'Test' }),
+      ).rejects.toThrow('Ошибка авторизации. Проверьте KAITEN_API_TOKEN');
+    });
+
+    it('should throw KaitenApiError on network error', async () => {
+      vi.mocked(fetch).mockRejectedValueOnce(new TypeError('Failed to fetch'));
+
+      await expect(
+        client.updateCard(12345, { title: 'Test' }),
+      ).rejects.toThrow(KaitenApiError);
+
+      vi.mocked(fetch).mockRejectedValueOnce(new TypeError('Failed to fetch'));
+      await expect(
+        client.updateCard(12345, { title: 'Test' }),
+      ).rejects.toThrow('Ошибка сети:');
     });
   });
 });
